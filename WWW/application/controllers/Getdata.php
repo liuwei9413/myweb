@@ -3,6 +3,7 @@
 
         public function index()
         {
+            //抓取数据函数
             function curl_post($url, $apiParams=array(), $header=array()){
                 $curl = curl_init();
                     
@@ -49,21 +50,29 @@
             $url_show = $domain . 'show/' . $urlId . '.html';
             $data_play = curl_post($url_play, $apiParams=array(), $header);
             $data_show = curl_post($url_show, $apiParams=array(), $header);
-            //视频iframe链接地址
-            $reg_iframeUrl = '/src=\"(.+)\"\swidth=\"100%\"\>\<\/iframe\>/i';
-            $match_iframe = array();
-            if( preg_match($reg_iframeUrl, $data_play, $match_iframe) ) {
-                $match_iframe = $match_iframe[1];   //http://zxfuli.117o.com/jx/dapi.php?id=xJSpcJaczK2hdGdrmaN3goh3sH22g6mBoG9y&key=d3b72cc414811004
-            } 
-            //视频名称
-            $reg_movie_name = '/\<h1 class=\"movie\-title\"\>(.+)\<span class=\"movie\-year\"\>\((\d+)\)\<\/span\>/i';
-            $match_movie_name = array();
-            if( preg_match($reg_movie_name, $data_show, $match_movie_name) ) {
-                var_dump($match_movie_name); die;
-                $match_movie_name = $match_movie_name[1];  
-                $match_movie_year = $match_movie_name[2];  
-            } 
-
+            $start = '<div class="col-md-9">';
+            $end = '<div class="col-md-3">';
+            $data_show_reg = '/'.$start.'([\s\S]*)'.$end.'/iU';
+            if ( preg_match($data_show_reg, $data_show, $data_show_data) ) {
+                $data_show_data = $data_show_data[1];
+                // print_r($data_show_my); die;
+            }
+            //电影相关信息
+            function movieInfo($start, $end, $data) {
+                $reg = '/'.$start.'([\s\S]*)'.$end.'/iU';
+                if ( preg_match($reg, $data, $tdata) ) {
+                    return $tdata[1];
+                }
+            }
+            $movie_name = movieInfo('class=\"img-thumbnail\" alt=\"', '\" width=\"100%\"', $data_show_data);
+            print_r($movie_name); die;
+            $start_img = 'class=\"img-thumbnail\" alt=\"';
+            $end_img = '\" width=\"100%\"';
+            $reg_img = '/'.$start_img.'([\s\S]*)'.$end_img.'/iU';
+            if ( preg_match($reg_img, $data_show, $movie_img) ) {
+                $movie_img = $movie_img[1];
+            }
+            print_r($movie_img); die;
 
             //匹配视频关键id
             // $data_id = curl_post($match_iframe, $apiParams=array(), $header);
@@ -79,7 +88,16 @@
             // $url_xml = $service_path . $id;
             // $data_xml = curl_post($url_xml, $apiParams=array(), $header);
 
+            // echo FCPATH.'xml\19242.xml'; die;
             // echo file_put_contents("D:/myweb/WWW/xml/".$urlId.".xml", $data_xml);
+            
+            //数据库连接
+            // $this->load->database();
+            // $query = $this->db->get('movie');   
+            // foreach ($query->result() as $row)
+            // {
+            //     print_r($row); 
+            // }  
         }
     }
 ?>
